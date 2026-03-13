@@ -2,4 +2,4 @@ spring:
   application:
     name: webflux-playground
 
-section: sec02
+section: sec03
