@@ -1,6 +1,7 @@
 package dev.magadiflo.app.sec02;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -25,6 +26,17 @@ public class ReactiveWebController {
                 .retrieve()
                 .bodyToFlux(Product.class)
                 .doOnNext(product -> log.info("recibido: {}", product));
+
+        return Mono.fromSupplier(() -> ResponseEntity.ok(productFlux));
+    }
+
+    @GetMapping(path = "/products/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Mono<ResponseEntity<Flux<Product>>> getProductsStream() {
+        Flux<Product> productFlux = this.webClient.get()
+                .uri("/demo01/products")
+                .retrieve()
+                .bodyToFlux(Product.class)
+                .doOnNext(product -> log.info("recibido stream: {}", product));
 
         return Mono.fromSupplier(() -> ResponseEntity.ok(productFlux));
     }
