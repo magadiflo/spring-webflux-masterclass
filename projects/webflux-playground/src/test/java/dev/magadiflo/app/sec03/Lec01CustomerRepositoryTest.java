@@ -82,4 +82,41 @@ class Lec01CustomerRepositoryTest extends AbstractTest {
                 })
                 .verifyComplete();
     }
+
+    @Test
+    void insertAndDeleteCustomer() {
+        // given
+        Customer customer = Customer.builder()
+                .name("Lesly")
+                .email("lesly@gmail.com")
+                .build();
+
+        // when
+        Mono<Customer> customerMono = this.repository.save(customer)
+                .doOnNext(savedCustomer -> log.info("{}", savedCustomer));
+
+        // then
+        StepVerifier.create(customerMono)
+                .assertNext(savedCustomer -> {
+                    assertThat(savedCustomer.getId())
+                            .isNotNull();
+                    assertThat(savedCustomer)
+                            .extracting(Customer::getName, Customer::getEmail)
+                            .containsExactly("Lesly", "lesly@gmail.com");
+                })
+                .verifyComplete();
+
+        // Verificamos que el total de registros aumentó a 11
+        this.repository.count()
+                .as(StepVerifier::create)
+                .expectNext(11L)
+                .verifyComplete();
+
+        // Eliminamos el registro insertado y verificamos que vuelve a 10
+        this.repository.deleteById(11L)
+                .then(this.repository.count())
+                .as(StepVerifier::create)
+                .expectNext(10L)
+                .verifyComplete();
+    }
 }
