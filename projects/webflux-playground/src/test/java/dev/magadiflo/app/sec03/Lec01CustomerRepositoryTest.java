@@ -119,4 +119,27 @@ class Lec01CustomerRepositoryTest extends AbstractTest {
                 .expectNext(10L)
                 .verifyComplete();
     }
+
+    @Test
+    void updateCustomer() {
+        // given
+        String name = "ethan";
+
+        // when
+        Flux<Customer> customerFlux = this.repository.findByName(name)                      // Buscar clientes por nombre
+                .map(customer -> {
+                    customer.setName("noel");                                               // Mutar el objeto (cambiar nombre)
+                    return customer;
+                })
+                .flatMap(customer -> this.repository.save(customer)) // Persistir cambios en la BD
+                .doOnNext(customer -> log.info("{}", customer));            // Loguear para depuración
+
+        // then
+        StepVerifier.create(customerFlux)
+                .thenConsumeWhile(customer -> {                       // Consume señales onNext adicionales siempre que coincidan con un predicado.
+                    assertThat(customer.getName()).isEqualTo("noel");    // Nos apoyamos de AsserJ para verificar
+                    return true;                                                        // La condición para continuar consumiendo onNext, como es true, siempre consumirá, solo lo usamos para consumir los elementos
+                })
+                .verifyComplete();
+    }
 }
