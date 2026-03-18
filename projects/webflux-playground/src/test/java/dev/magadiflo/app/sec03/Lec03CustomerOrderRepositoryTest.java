@@ -1,5 +1,6 @@
 package dev.magadiflo.app.sec03;
 
+import dev.magadiflo.app.sec03.projection.OrderDetails;
 import dev.magadiflo.app.sec03.entity.Product;
 import dev.magadiflo.app.sec03.repository.CustomerOrderRepository;
 import lombok.extern.slf4j.Slf4j;
@@ -36,6 +37,34 @@ class Lec03CustomerOrderRepositoryTest extends AbstractTest {
                     assertThat(product.getId()).isEqualTo(4);
                     assertThat(product.getDescription()).isEqualTo("mac pro");
                     assertThat(product.getPrice()).isEqualTo(3000);
+                })
+                .verifyComplete();
+    }
+
+    @Test
+    void orderDetailsByProduct() {
+        // given
+        String productName = "iphone 18";
+
+        // when
+        Flux<OrderDetails> orderDetailsFlux = this.customerOrderRepository.getOrderDetailsByProduct(productName)
+                .doOnNext(orderDetails -> log.info("{}", orderDetails));
+
+        // then
+        StepVerifier.create(orderDetailsFlux)
+                .assertNext(orderDetail -> {
+                    assertThat(orderDetail.orderId()).isNotNull();
+                    assertThat(orderDetail.customerName()).isEqualTo("sam");
+                    assertThat(orderDetail.amount()).isEqualTo(850);
+                })
+                .assertNext(orderDetail -> {
+                    assertThat(orderDetail.orderId()).isNotNull();
+                    assertThat(orderDetail.customerName()).isEqualTo("jake");
+                    assertThat(orderDetail.amount()).isEqualTo(775);
+                }).assertNext(orderDetail -> {
+                    assertThat(orderDetail.orderId()).isNotNull();
+                    assertThat(orderDetail.customerName()).isEqualTo("jake");
+                    assertThat(orderDetail.amount()).isEqualTo(750);
                 })
                 .verifyComplete();
     }
