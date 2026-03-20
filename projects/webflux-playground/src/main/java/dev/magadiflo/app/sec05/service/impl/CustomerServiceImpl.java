@@ -1,0 +1,54 @@
+package dev.magadiflo.app.sec05.service.impl;
+
+import dev.magadiflo.app.sec05.dto.CustomerRequest;
+import dev.magadiflo.app.sec05.dto.CustomerResponse;
+import dev.magadiflo.app.sec05.mapper.CustomerMapper;
+import dev.magadiflo.app.sec05.repository.CustomerRepository;
+import dev.magadiflo.app.sec05.service.CustomerService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+@Slf4j
+@RequiredArgsConstructor
+@Service
+public class CustomerServiceImpl implements CustomerService {
+
+    private final CustomerRepository customerRepository;
+    private final CustomerMapper customerMapper;
+
+    @Override
+    public Flux<CustomerResponse> getAllCustomers() {
+        return this.customerRepository.findAll()
+                .map(this.customerMapper::toCustomerResponse);
+    }
+
+    @Override
+    public Mono<CustomerResponse> getCustomer(Long customerId) {
+        return this.customerRepository.findById(customerId)
+                .map(this.customerMapper::toCustomerResponse);
+    }
+
+    @Override
+    public Mono<CustomerResponse> saveCustomer(CustomerRequest customerRequest) {
+        return Mono.just(customerRequest)
+                .map(this.customerMapper::toCustomer)
+                .flatMap(this.customerRepository::save)
+                .map(this.customerMapper::toCustomerResponse);
+    }
+
+    @Override
+    public Mono<CustomerResponse> updateCustomer(Long customerId, CustomerRequest customerRequest) {
+        return this.customerRepository.findById(customerId)
+                .map(customer -> this.customerMapper.toCustomerUpdate(customer, customerRequest))
+                .flatMap(this.customerRepository::save)
+                .map(this.customerMapper::toCustomerResponse);
+    }
+
+    @Override
+    public Mono<Void> deleteCustomer(Long customerId) {
+        return this.customerRepository.deleteById(customerId);
+    }
+}

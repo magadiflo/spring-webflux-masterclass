@@ -15,6 +15,12 @@ public class CustomerMapper {
                 .build();
     }
 
+    public Customer toCustomerUpdate(Customer customer, CustomerRequest request) {
+        customer.setName(request.name());
+        customer.setEmail(request.email());
+        return customer;
+    }
+
     public CustomerResponse toCustomerResponse(Customer customer) {
         return new CustomerResponse(
                 customer.getId(),
