@@ -7,6 +7,7 @@ import dev.magadiflo.app.sec05.repository.CustomerRepository;
 import dev.magadiflo.app.sec05.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -22,6 +23,12 @@ public class CustomerServiceImpl implements CustomerService {
     @Override
     public Flux<CustomerResponse> getAllCustomers() {
         return this.customerRepository.findAll()
+                .map(this.customerMapper::toCustomerResponse);
+    }
+
+    @Override
+    public Flux<CustomerResponse> getAllCustomers(int pageNumber, int pageSize) {
+        return this.customerRepository.findBy(PageRequest.of(pageNumber, pageSize))
                 .map(this.customerMapper::toCustomerResponse);
     }
 

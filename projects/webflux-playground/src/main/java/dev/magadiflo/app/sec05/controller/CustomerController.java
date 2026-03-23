@@ -7,16 +7,11 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -31,6 +26,15 @@ public class CustomerController {
         Flux<CustomerResponse> customerResponseFlux = this.customerService.getAllCustomers()
                 .doOnNext(customer -> log.info(customer.toString()));
         return Mono.fromSupplier(() -> ResponseEntity.ok(customerResponseFlux));
+    }
+
+    @GetMapping(path = "/simple-pagination")
+    public Mono<ResponseEntity<List<CustomerResponse>>> getSimplePaginationCustomers(
+            @RequestParam(name = "page", required = false, defaultValue = "0") int pageNumber,
+            @RequestParam(name = "size", required = false, defaultValue = "5") int pageSize) {
+        return this.customerService.getAllCustomers(pageNumber, pageSize)
+                .collectList()
+                .map(ResponseEntity::ok);
     }
 
     @GetMapping(path = "/{customerId}")

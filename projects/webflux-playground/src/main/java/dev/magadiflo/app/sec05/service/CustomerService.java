@@ -8,6 +8,8 @@ import reactor.core.publisher.Mono;
 public interface CustomerService {
     Flux<CustomerResponse> getAllCustomers();
 
+    Flux<CustomerResponse> getAllCustomers(int pageNumber, int pageSize);
+
     Mono<CustomerResponse> getCustomer(Long customerId);
 
     Mono<CustomerResponse> saveCustomer(CustomerRequest customerRequest);
