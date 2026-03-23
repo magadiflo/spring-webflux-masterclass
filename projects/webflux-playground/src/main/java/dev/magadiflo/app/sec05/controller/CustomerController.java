@@ -36,7 +36,8 @@ public class CustomerController {
     @GetMapping(path = "/{customerId}")
     public Mono<ResponseEntity<CustomerResponse>> getCustomer(@PathVariable Long customerId) {
         return this.customerService.getCustomer(customerId)
-                .map(ResponseEntity::ok);
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @PostMapping
@@ -54,7 +55,8 @@ public class CustomerController {
                                                                  @RequestBody Mono<CustomerRequest> requestMono) {
         return requestMono
                 .flatMap(request -> this.customerService.updateCustomer(customerId, request))
-                .map(ResponseEntity::ok);
+                .map(ResponseEntity::ok)
+                .defaultIfEmpty(ResponseEntity.notFound().build());
     }
 
     @DeleteMapping(path = "/{customerId}")
