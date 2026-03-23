@@ -48,7 +48,7 @@ public class CustomerServiceImpl implements CustomerService {
     }
 
     @Override
-    public Mono<Void> deleteCustomer(Long customerId) {
-        return this.customerRepository.deleteById(customerId);
+    public Mono<Boolean> deleteCustomer(Long customerId) {
+        return this.customerRepository.deleteCustomerById(customerId);
     }
 }

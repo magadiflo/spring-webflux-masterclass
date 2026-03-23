@@ -14,5 +14,5 @@ public interface CustomerService {
 
     Mono<CustomerResponse> updateCustomer(Long customerId, CustomerRequest customerRequest);
 
-    Mono<Void> deleteCustomer(Long customerId);
+    Mono<Boolean> deleteCustomer(Long customerId);
 }
