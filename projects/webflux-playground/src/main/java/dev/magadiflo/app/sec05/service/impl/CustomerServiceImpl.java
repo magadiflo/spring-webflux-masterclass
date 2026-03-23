@@ -7,7 +7,10 @@ import dev.magadiflo.app.sec05.repository.CustomerRepository;
 import dev.magadiflo.app.sec05.service.CustomerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -30,6 +33,17 @@ public class CustomerServiceImpl implements CustomerService {
     public Flux<CustomerResponse> getAllCustomers(int pageNumber, int pageSize) {
         return this.customerRepository.findBy(PageRequest.of(pageNumber, pageSize))
                 .map(this.customerMapper::toCustomerResponse);
+    }
+
+    @Override
+    public Mono<Page<CustomerResponse>> getAllCustomers(Pageable pageable) {
+        return this.customerRepository.findBy(pageable)
+                .map(this.customerMapper::toCustomerResponse)
+                .collectList()
+                .zipWith(
+                        this.customerRepository.count(),
+                        (customerResponseList, total) -> new PageImpl<>(customerResponseList, pageable, total)
+                );
     }
 
     @Override
