@@ -189,4 +189,30 @@ class CustomerControllerTest {
                 .jsonPath("$.name").isEqualTo("Noel")
                 .jsonPath("$.email").isEqualTo("noel@gmail.com");
     }
+
+    @Test
+    void customerNotFound() {
+        // get
+        this.client.get()
+                .uri("/api/v1/customers/{id}", 11)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody().isEmpty();
+
+        // delete
+        this.client.delete()
+                .uri("/api/v1/customers/{id}", 11)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody().isEmpty();
+
+        // put
+        CustomerRequest request = new CustomerRequest("Noel", "noel@gmail.com");
+        this.client.put()
+                .uri("/api/v1/customers/{id}", 11)
+                .bodyValue(request)
+                .exchange()
+                .expectStatus().isNotFound()
+                .expectBody().isEmpty();
+    }
 }
