@@ -1,5 +1,6 @@
 package dev.magadiflo.app.sec05;
 
+import dev.magadiflo.app.sec05.dto.CustomerRequest;
 import dev.magadiflo.app.sec05.dto.CustomerResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -19,12 +20,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class CustomerControllerTest {
 
     @Autowired
-    private WebTestClient cliente;
+    private WebTestClient client;
 
     @Test
     void allCustomers() {
         // given & when
-        WebTestClient.ResponseSpec response = this.cliente.get()
+        WebTestClient.ResponseSpec response = this.client.get()
                 .uri("/api/v1/customers")// No necesitamos proporcionar toda la url completa http://localhost:8080/api/v1/customers, ¿explica por qué? yo creo que porque estamos usando WebEnvironment.MOCK (valor por defecto)
                 .exchange();
 
@@ -42,7 +43,7 @@ class CustomerControllerTest {
     @Test
     void getSimplePaginationCustomers() {
         // given & when
-        WebTestClient.ResponseSpec response = this.cliente.get()
+        WebTestClient.ResponseSpec response = this.client.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/v1/customers/simple-pagination")
                         .queryParam("page", 2)
@@ -64,7 +65,7 @@ class CustomerControllerTest {
     @Test
     void getAdvancedPaginationCustomers() {
         // given & when
-        WebTestClient.ResponseSpec response = this.cliente.get()
+        WebTestClient.ResponseSpec response = this.client.get()
                 .uri(uriBuilder -> uriBuilder
                         .path("/api/v1/customers/advanced-pagination")
                         .queryParam("page", 0)
@@ -86,5 +87,106 @@ class CustomerControllerTest {
                 .jsonPath("$.totalPages").isEqualTo(4)              // Total de páginas calculadas
                 .jsonPath("$.first").isEqualTo(true)                // Indicador de primera página
                 .jsonPath("$.last").isEqualTo(false);               // No es la última página
+    }
+
+    @Test
+    void customerById() {
+        // given
+        Long customerId = 1L;
+
+        // when
+        WebTestClient.ResponseSpec response = this.client.get()
+                .uri("/api/v1/customers/{customerId}", customerId)
+                .exchange();
+
+        // then
+        response.expectStatus().is2xxSuccessful()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .consumeWith(result -> log.info("{}", new String(Objects.requireNonNull(result.getResponseBody()))))
+                .jsonPath("$.id").isEqualTo(customerId)
+                .jsonPath("$.name").isEqualTo("sam")
+                .jsonPath("$.email").isEqualTo("sam@gmail.com");
+    }
+
+    @Test
+    void customerById2() {
+        // given
+        Long customerId = 1L;
+
+        // when
+        WebTestClient.ResponseSpec response = this.client.get()
+                .uri("/api/v1/customers/{customerId}", customerId)
+                .exchange();
+
+        // then
+        response.expectStatus().is2xxSuccessful()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CustomerResponse.class)
+                .consumeWith(result -> {
+                    CustomerResponse customerResponse = result.getResponseBody();
+                    log.info("{}", customerResponse);
+                    assertThat(customerResponse)
+                            .isNotNull()
+                            .extracting(CustomerResponse::id, CustomerResponse::name, CustomerResponse::email)
+                            .containsExactly(customerId, "sam", "sam@gmail.com");
+                });
+    }
+
+    @Test
+    void createAndDeleteCustomer() {
+        // given
+        CustomerRequest request = new CustomerRequest("Karen", "kasari@gmail.com");
+
+        // when
+        WebTestClient.ResponseSpec response = this.client.post()
+                .uri("/api/v1/customers")
+                .contentType(MediaType.APPLICATION_JSON)      //<-- Request
+                .accept(MediaType.APPLICATION_JSON)  //<-- Response
+                .bodyValue(request)
+                .exchange();
+
+        // then
+        CustomerResponse customerResponse = response.expectStatus().isCreated()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody(CustomerResponse.class)
+                .returnResult()
+                .getResponseBody();
+        log.info("{}", customerResponse);
+
+        assertThat(customerResponse)
+                .isNotNull()
+                .extracting(CustomerResponse::name, CustomerResponse::email)
+                .containsExactly("Karen", "kasari@gmail.com");
+        assertThat(customerResponse.id()).isNotNull();
+
+        // cleanup
+        this.client.delete()
+                .uri("/api/v1/customers/{customerId}", customerResponse.id())
+                .exchange()
+                .expectStatus().isNoContent()
+                .expectBody().isEmpty();
+    }
+
+    @Test
+    void updateCustomer() {
+        // given
+        CustomerRequest request = new CustomerRequest("Noel", "noel@gmail.com");
+        Long customerId = 10L;
+
+        // when
+        WebTestClient.ResponseSpec exchangeCreate = this.client.put()
+                .uri("/api/v1/customers/{id}", customerId)
+                .bodyValue(request)
+                .exchange();
+
+        // then
+        exchangeCreate.expectStatus().is2xxSuccessful()
+                .expectHeader().contentType(MediaType.APPLICATION_JSON)
+                .expectBody()
+                .consumeWith(result -> log.info("{}", new String(Objects.requireNonNull(result.getResponseBody()))))
+                .jsonPath("$.id").isEqualTo(customerId)
+                .jsonPath("$.name").isEqualTo("Noel")
+                .jsonPath("$.email").isEqualTo("noel@gmail.com");
     }
 }
