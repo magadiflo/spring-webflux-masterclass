@@ -11,9 +11,17 @@ spring:
     username: postgres
     password: magadiflo
 
+  # API Versioning (Spring Boot 4)
+  webflux:
+    api-version:
+      required: true
+      supported: 1,2
+      use:
+        path-segment: 1
+
 logging:
   level:
     io.r2dbc.postgresql.QUERY: debug
     io.r2dbc.postgresql.PARAM: debug
 
-section: sec03
+section: sec05
