@@ -3,6 +3,7 @@ package dev.magadiflo.app.sec06.controller;
 import dev.magadiflo.app.sec06.dto.CustomerRequest;
 import dev.magadiflo.app.sec06.dto.CustomerResponse;
 import dev.magadiflo.app.sec06.service.CustomerService;
+import dev.magadiflo.app.sec06.validator.CustomerValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -58,13 +59,13 @@ public class CustomerController {
     @GetMapping(path = "/{customerId}")
     public Mono<ResponseEntity<CustomerResponse>> getCustomer(@PathVariable Long customerId) {
         return this.customerService.getCustomer(customerId)
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok);
     }
 
     @PostMapping
     public Mono<ResponseEntity<CustomerResponse>> saveCustomer(@RequestBody Mono<CustomerRequest> requestMono) {
         return requestMono
+                .transform(CustomerValidator.validate())
                 .flatMap(this.customerService::saveCustomer)
                 .map(customerResponse -> ResponseEntity
                         .status(HttpStatus.CREATED)
@@ -76,16 +77,14 @@ public class CustomerController {
     public Mono<ResponseEntity<CustomerResponse>> updateCustomer(@PathVariable Long customerId,
                                                                  @RequestBody Mono<CustomerRequest> requestMono) {
         return requestMono
+                .transform(CustomerValidator.validate())
                 .flatMap(request -> this.customerService.updateCustomer(customerId, request))
-                .map(ResponseEntity::ok)
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .map(ResponseEntity::ok);
     }
 
     @DeleteMapping(path = "/{customerId}")
     public Mono<ResponseEntity<Void>> deleteCustomer(@PathVariable Long customerId) {
         return this.customerService.deleteCustomer(customerId)
-                .filter(wasDeleted -> wasDeleted)
-                .map(wasDeleted -> ResponseEntity.noContent().<Void>build())
-                .defaultIfEmpty(ResponseEntity.notFound().build());
+                .thenReturn(ResponseEntity.noContent().build());
     }
 }

@@ -2,6 +2,8 @@ package dev.magadiflo.app.sec06.service.impl;
 
 import dev.magadiflo.app.sec06.dto.CustomerRequest;
 import dev.magadiflo.app.sec06.dto.CustomerResponse;
+import dev.magadiflo.app.sec06.entity.Customer;
+import dev.magadiflo.app.sec06.exception.CustomerErrors;
 import dev.magadiflo.app.sec06.mapper.CustomerMapper;
 import dev.magadiflo.app.sec06.repository.CustomerRepository;
 import dev.magadiflo.app.sec06.service.CustomerService;
@@ -48,7 +50,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Mono<CustomerResponse> getCustomer(Long customerId) {
-        return this.customerRepository.findById(customerId)
+        return this.findCustomerOrThrow(customerId)
                 .map(this.customerMapper::toCustomerResponse);
     }
 
@@ -62,14 +64,20 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Override
     public Mono<CustomerResponse> updateCustomer(Long customerId, CustomerRequest customerRequest) {
-        return this.customerRepository.findById(customerId)
+        return this.findCustomerOrThrow(customerId)
                 .map(customer -> this.customerMapper.toCustomerUpdate(customer, customerRequest))
                 .flatMap(this.customerRepository::save)
                 .map(this.customerMapper::toCustomerResponse);
     }
 
     @Override
-    public Mono<Boolean> deleteCustomer(Long customerId) {
-        return this.customerRepository.deleteCustomerById(customerId);
+    public Mono<Void> deleteCustomer(Long customerId) {
+        return this.findCustomerOrThrow(customerId)
+                .flatMap(customer -> this.customerRepository.deleteById(customerId));
+    }
+
+    private Mono<Customer> findCustomerOrThrow(Long customerId) {
+        return this.customerRepository.findById(customerId)
+                .switchIfEmpty(CustomerErrors.customerNotFound(customerId));
     }
 }
