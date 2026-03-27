@@ -2,6 +2,7 @@ package dev.magadiflo.app.sec07.controller;
 
 import dev.magadiflo.app.sec07.dto.CustomerRequest;
 import dev.magadiflo.app.sec07.dto.CustomerResponse;
+import dev.magadiflo.app.sec07.filter.Category;
 import dev.magadiflo.app.sec07.service.CustomerService;
 import dev.magadiflo.app.sec07.validator.CustomerValidator;
 import lombok.RequiredArgsConstructor;
@@ -10,7 +11,16 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestAttribute;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -25,7 +35,9 @@ public class CustomerController {
     private final CustomerService customerService;
 
     @GetMapping
-    public Mono<ResponseEntity<Flux<CustomerResponse>>> allCustomers() {
+    public Mono<ResponseEntity<Flux<CustomerResponse>>> allCustomers(@RequestAttribute Category category) {
+        log.info("Obteniendo categoría agregada en el AuthenticationWebFilter: {}", category);
+
         Flux<CustomerResponse> customerResponseFlux = this.customerService.getAllCustomers()
                 .doOnNext(customer -> log.info(customer.toString()));
         return Mono.fromSupplier(() -> ResponseEntity.ok(customerResponseFlux));
