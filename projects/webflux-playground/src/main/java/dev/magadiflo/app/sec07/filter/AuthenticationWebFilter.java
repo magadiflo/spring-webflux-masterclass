@@ -32,6 +32,7 @@ public class AuthenticationWebFilter implements WebFilter {
         log.info("Token a autenticar: {}", token);
 
         if (Objects.nonNull(token) && TOKEN_CATEGORY_MAP.containsKey(token)) {
+            exchange.getAttributes().put("category", TOKEN_CATEGORY_MAP.get(token));
             return chain.filter(exchange);
         }
 
