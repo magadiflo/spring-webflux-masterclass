@@ -1,5 +1,7 @@
 package dev.magadiflo.app.sec07.filter;
 
+import dev.magadiflo.app.sec07.advice.FilterExceptionHandler;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -14,9 +16,12 @@ import java.util.Map;
 import java.util.Objects;
 
 @Slf4j
+@RequiredArgsConstructor
 @Order(1)
 @Component
 public class AuthenticationWebFilter implements WebFilter {
+
+    private final FilterExceptionHandler filterExceptionHandler;
 
     private static final Map<String, Category> TOKEN_CATEGORY_MAP = Map.of(
             "secret123", Category.STANDARD,
@@ -36,6 +41,8 @@ public class AuthenticationWebFilter implements WebFilter {
             return chain.filter(exchange);
         }
 
-        return Mono.fromRunnable(() -> exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED));
+        log.error("Retornando un ProblemDetail...");
+        return this.filterExceptionHandler
+                .sendProblemDetail(exchange, HttpStatus.UNAUTHORIZED, "Error al autenticar");
     }
 }
