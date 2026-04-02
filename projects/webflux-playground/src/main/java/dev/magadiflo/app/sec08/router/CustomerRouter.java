@@ -1,17 +1,24 @@
 package dev.magadiflo.app.sec08.router;
 
+import dev.magadiflo.app.sec08.exception.CustomerNotFoundException;
+import dev.magadiflo.app.sec08.exception.InvalidInputException;
+import dev.magadiflo.app.sec08.handler.CustomerExceptionHandler;
 import dev.magadiflo.app.sec08.handler.CustomerHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
 
+@RequiredArgsConstructor
 @Configuration
 public class CustomerRouter {
 
     private static final String CUSTOMERS_URI = "/api/v1/customers";
     private static final String CUSTOMER_ID_PATH = "/{customerId}";
+
+    private final CustomerExceptionHandler customerExceptionHandler;
 
     @Bean
     public RouterFunction<ServerResponse> customerRoutes(CustomerHandler handler) {
@@ -21,6 +28,8 @@ public class CustomerRouter {
                 .POST(CUSTOMERS_URI, handler::saveCustomer)
                 .PUT(CUSTOMERS_URI + CUSTOMER_ID_PATH, handler::updateCustomer)
                 .DELETE(CUSTOMERS_URI + CUSTOMER_ID_PATH, handler::deleteCustomer)
+                .onError(CustomerNotFoundException.class, this.customerExceptionHandler::handleNotFoundException)
+                .onError(InvalidInputException.class, this.customerExceptionHandler::handleInvalidInputException)
                 .build();
     }
 }
