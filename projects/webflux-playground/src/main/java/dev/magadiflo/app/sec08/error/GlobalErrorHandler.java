@@ -11,6 +11,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ProblemDetail;
 import org.springframework.http.codec.ServerCodecConfigurer;
 import org.springframework.stereotype.Component;
+import org.springframework.web.reactive.function.server.RequestPredicates;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -39,10 +40,15 @@ public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
 
     @Override
     protected RouterFunction<ServerResponse> getRoutingFunction(ErrorAttributes errorAttributes) {
-        return RouterFunctions.route()
-                .onError(NumberFormatException.class, this::handleNumberFormatException)
-                .onError(Exception.class, this::handleGenericException)
-                .build();
+        return RouterFunctions.route(RequestPredicates.all(), this::handleAllErrors);
+    }
+
+    private Mono<ServerResponse> handleAllErrors(ServerRequest request) {
+        Throwable throwable = this.getError(request);
+        return switch (throwable) {
+            case NumberFormatException ex -> this.handleNumberFormatException(ex, request);
+            default -> this.handleGenericException(throwable, request);
+        };
     }
 
     private Mono<ServerResponse> handleNumberFormatException(NumberFormatException ex, ServerRequest request) {
@@ -50,7 +56,8 @@ public class GlobalErrorHandler extends AbstractErrorWebExceptionHandler {
 
         return this.buildResponse(HttpStatus.BAD_REQUEST, ex, request, problemDetail -> {
             problemDetail.setType(URI.create("https://example.com/problems/invalid-number-format"));
-            problemDetail.setTitle("Entrada no válida. Se esperaba un valor numérico");
+            problemDetail.setDetail("Se esperaba un valor numérico pero se recibió un valor no válido");
+            problemDetail.setTitle("Entrada no válida");
         });
     }
 
