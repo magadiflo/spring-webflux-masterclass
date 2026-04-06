@@ -6,6 +6,7 @@ import dev.magadiflo.app.sec08.service.CustomerService;
 import dev.magadiflo.app.sec08.validator.CustomerValidator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.server.ServerRequest;
@@ -24,6 +25,23 @@ public class CustomerHandler {
                 .doOnNext(customerResponse -> log.info("{}", customerResponse))
                 .as(customerResponseFlux ->
                         ServerResponse.ok().body(customerResponseFlux, CustomerResponse.class));
+    }
+
+    public Mono<ServerResponse> getSimplePaginationCustomers(ServerRequest request) {
+        Integer pageNumber = this.getIntQueryParam(request, "page", 0);
+        Integer pageSize = this.getIntQueryParam(request, "size", 5);
+        return this.customerService.getAllCustomers(pageNumber, pageSize)
+                .collectList()
+                .flatMap(customerResponseList ->
+                        ServerResponse.ok().bodyValue(customerResponseList));
+    }
+
+    public Mono<ServerResponse> getAdvancedPaginationCustomers(ServerRequest request) {
+        Integer pageNumber = this.getIntQueryParam(request, "page", 0);
+        Integer pageSize = this.getIntQueryParam(request, "size", 5);
+        return this.customerService.getAllCustomers(PageRequest.of(pageNumber, pageSize))
+                .flatMap(customerResponsePage ->
+                        ServerResponse.ok().bodyValue(customerResponsePage));
     }
 
     public Mono<ServerResponse> getCustomer(ServerRequest request) {
@@ -56,5 +74,11 @@ public class CustomerHandler {
 
     private long customerId(ServerRequest request) {
         return Long.parseLong(request.pathVariable("customerId"));
+    }
+
+    private Integer getIntQueryParam(ServerRequest request, String param, int defaultValue) {
+        return request.queryParam(param)
+                .map(Integer::parseInt)
+                .orElse(defaultValue);
     }
 }

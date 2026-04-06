@@ -24,6 +24,8 @@ public class CustomerRouter {
     public RouterFunction<ServerResponse> customerRoutes(CustomerHandler handler) {
         return RouterFunctions.route()
                 .GET(CUSTOMERS_URI, handler::allCustomers)
+                .GET(CUSTOMERS_URI + "/simple-pagination", handler::getSimplePaginationCustomers)
+                .GET(CUSTOMERS_URI + "/advanced-pagination", handler::getAdvancedPaginationCustomers)
                 .GET(CUSTOMERS_URI + CUSTOMER_ID_PATH, handler::getCustomer)
                 .POST(CUSTOMERS_URI, handler::saveCustomer)
                 .PUT(CUSTOMERS_URI + CUSTOMER_ID_PATH, handler::updateCustomer)
