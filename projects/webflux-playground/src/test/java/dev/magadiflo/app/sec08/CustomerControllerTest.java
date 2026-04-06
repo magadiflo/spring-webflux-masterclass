@@ -1,7 +1,7 @@
-package dev.magadiflo.app.sec05;
+package dev.magadiflo.app.sec08;
 
-import dev.magadiflo.app.sec05.dto.CustomerRequest;
-import dev.magadiflo.app.sec05.dto.CustomerResponse;
+import dev.magadiflo.app.sec08.dto.CustomerRequest;
+import dev.magadiflo.app.sec08.dto.CustomerResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 @AutoConfigureWebTestClient
-@SpringBootTest(properties = "section=sec05", webEnvironment = SpringBootTest.WebEnvironment.MOCK)
+@SpringBootTest(properties = "section=sec08")
 class CustomerControllerTest {
 
     @Autowired
@@ -26,7 +26,6 @@ class CustomerControllerTest {
     void allCustomers() {
         // given & when
         WebTestClient.ResponseSpec response = this.client.get()
-                // No necesitamos http://localhost:8080 porque usamos WebEnvironment.MOCK
                 .uri("/api/v1/customers")
                 .exchange();
 
@@ -197,15 +196,13 @@ class CustomerControllerTest {
         this.client.get()
                 .uri("/api/v1/customers/{id}", 11)
                 .exchange()
-                .expectStatus().isNotFound()
-                .expectBody().isEmpty();
+                .expectStatus().isNotFound();
 
         // delete
         this.client.delete()
                 .uri("/api/v1/customers/{id}", 11)
                 .exchange()
-                .expectStatus().isNotFound()
-                .expectBody().isEmpty();
+                .expectStatus().isNotFound();
 
         // put
         CustomerRequest request = new CustomerRequest("Noel", "noel@gmail.com");
@@ -213,7 +210,6 @@ class CustomerControllerTest {
                 .uri("/api/v1/customers/{id}", 11)
                 .bodyValue(request)
                 .exchange()
-                .expectStatus().isNotFound()
-                .expectBody().isEmpty();
+                .expectStatus().isNotFound();
     }
 }
