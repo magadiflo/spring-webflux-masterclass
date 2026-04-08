@@ -22,4 +22,18 @@ class Lec01MonoTest extends AbstractWebClient {
         // Permite que la suscripción finalice antes de que termine el test
         Thread.sleep(Duration.ofSeconds(2));
     }
+
+    @Test
+    void concurrentRequests() throws InterruptedException {
+        for (int i = 1; i <= 100; i++) {
+            this.client.get()
+                    .uri("/lec01/product/{id}", i)
+                    .retrieve()
+                    .bodyToMono(Product.class)
+                    .doOnNext(this.print())
+                    .subscribe();
+        }
+
+        Thread.sleep(Duration.ofSeconds(2));
+    }
 }
