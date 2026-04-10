@@ -3,10 +3,14 @@ package dev.magadiflo.app.sec09;
 import dev.magadiflo.app.sec09.dto.Calculator;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ProblemDetail;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import reactor.core.publisher.Mono;
 import reactor.test.StepVerifier;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 class Lec05ErrorResponseTest extends AbstractWebClient {
@@ -58,5 +62,25 @@ class Lec05ErrorResponseTest extends AbstractWebClient {
                 .then()
                 .as(StepVerifier::create)
                 .verifyComplete();
+    }
+
+    @Test
+    void handlingErrorWithOnStatus() {
+        this.client.get()
+                .uri("/lec05/calculator/{first}/{second}", 10, 20)
+                .header("operation", "@")
+                .retrieve()
+                .onStatus(HttpStatusCode::is4xxClientError,
+                        clientResponse -> Mono.error(new RuntimeException("Ocurrió un error en el cliente")))
+                .onStatus(HttpStatusCode::is5xxServerError,
+                        clientResponse -> Mono.error(new RuntimeException("Ocurrió un error en el servidor")))
+                .bodyToMono(Calculator.class)
+                .doOnError(throwable -> log.error("{}", throwable.getMessage()))
+                .as(StepVerifier::create)
+                .expectErrorSatisfies(throwable -> {
+                    assertThat(throwable).isInstanceOf(RuntimeException.class)
+                            .extracting(Throwable::getMessage).isEqualTo("Ocurrió un error en el cliente");
+                })
+                .verify();
     }
 }
