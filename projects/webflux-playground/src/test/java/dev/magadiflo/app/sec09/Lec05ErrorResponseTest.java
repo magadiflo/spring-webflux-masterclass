@@ -83,4 +83,28 @@ class Lec05ErrorResponseTest extends AbstractWebClient {
                 })
                 .verify();
     }
+
+    @Test
+    void exchangeToMonoCreateError() {
+        this.client.get()
+                .uri("/lec05/calculator/{first}/{second}", 10, 20)
+                .header("operation", "@")
+                .exchangeToMono(clientResponse -> {
+                    log.info("cookies: {}", clientResponse.cookies());
+                    log.info("headers: {}", clientResponse.headers().contentType().get());
+
+                    HttpStatusCode status = clientResponse.statusCode();
+                    log.info("status code: {}", status);
+
+                    if (status.is2xxSuccessful()) {
+                        return clientResponse.bodyToMono(Calculator.class);
+                    }
+
+                    return clientResponse.createError();
+                })
+                .doOnError(throwable ->  log.error("{}", throwable.getMessage()))
+                .as(StepVerifier::create)
+                .expectError()
+                .verify();
+    }
 }
