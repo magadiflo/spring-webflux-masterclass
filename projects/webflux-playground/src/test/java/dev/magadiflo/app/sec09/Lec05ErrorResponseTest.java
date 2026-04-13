@@ -102,7 +102,48 @@ class Lec05ErrorResponseTest extends AbstractWebClient {
 
                     return clientResponse.createError();
                 })
-                .doOnError(throwable ->  log.error("{}", throwable.getMessage()))
+                .doOnError(throwable -> log.error("{}", throwable.getMessage()))
+                .as(StepVerifier::create)
+                .expectError()
+                .verify();
+    }
+
+    @Test
+    void exchangeToMonoCreateException() {
+        this.client.get()
+                .uri("/lec05/calculator/{first}/{second}", 10, 20)
+                .header("operation", "@")
+                .exchangeToMono(clientResponse -> {
+
+                    HttpStatusCode status = clientResponse.statusCode();
+
+                    if (status.is2xxSuccessful()) {
+                        return clientResponse.bodyToMono(Calculator.class);
+                    }
+
+                    if (status.is4xxClientError()) {
+                        return clientResponse.createException()
+                                .flatMap(webClientResponseException -> {
+                                    ProblemDetail problemDetail = webClientResponseException.getResponseBodyAs(ProblemDetail.class);
+                                    log.error("is4xxClientError: {}", problemDetail);
+
+                                    return Mono.error(() -> new RuntimeException("Error del cliente: " + webClientResponseException.getMessage()));
+                                });
+                    }
+
+                    if (status.is5xxServerError()) {
+                        return clientResponse.createException()
+                                .flatMap(webClientResponseException -> {
+                                    ProblemDetail problemDetail = webClientResponseException.getResponseBodyAs(ProblemDetail.class);
+                                    log.error("is5xxServerError: {}", problemDetail);
+
+                                    return Mono.error(() -> new RuntimeException("Error del servidor: " + webClientResponseException.getMessage()));
+                                });
+                    }
+
+                    return clientResponse.createError();
+                })
+                .doOnError(throwable -> log.error("{}", throwable.getMessage()))
                 .as(StepVerifier::create)
                 .expectError()
                 .verify();
