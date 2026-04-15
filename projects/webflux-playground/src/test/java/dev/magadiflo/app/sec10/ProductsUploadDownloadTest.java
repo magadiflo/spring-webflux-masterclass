@@ -24,4 +24,17 @@ class ProductsUploadDownloadTest {
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
+
+    @Test
+    void uploadProducts2() {
+        Flux<ProductRequest> productRequestFlux = Flux.range(1, 10)
+                .map(i -> new ProductRequest("product-" + i, i))
+                .delayElements(Duration.ofSeconds(2));
+
+        this.productClient.uploadProducts(productRequestFlux)
+                .doOnNext(uploadResponse -> log.info("Recibido2: {}", uploadResponse))
+                .then()
+                .as(StepVerifier::create)
+                .verifyComplete();
+    }
 }
