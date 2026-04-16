@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import reactor.core.publisher.Flux;
 import reactor.test.StepVerifier;
 
+import java.nio.file.Path;
 import java.time.Duration;
 
 @Slf4j
@@ -46,6 +47,15 @@ class ProductsUploadDownloadTest {
         this.productClient.uploadProducts(productRequestFlux)
                 .doOnNext(uploadResponse -> log.info("Recibido3: {}", uploadResponse))
                 .then()
+                .as(StepVerifier::create)
+                .verifyComplete();
+    }
+
+    @Test
+    void downloadProducts() {
+        this.productClient.downloadProducts()
+                .map(Record::toString)
+                .as(stringFlux -> FileWriter.create(stringFlux, Path.of("products.txt")))
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
