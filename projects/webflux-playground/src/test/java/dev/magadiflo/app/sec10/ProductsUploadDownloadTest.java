@@ -37,4 +37,16 @@ class ProductsUploadDownloadTest {
                 .as(StepVerifier::create)
                 .verifyComplete();
     }
+
+    @Test
+    void uploadProducts3() {
+        Flux<ProductRequest> productRequestFlux = Flux.range(1, 1_000_000)
+                .map(i -> new ProductRequest("product-" + i, i));
+
+        this.productClient.uploadProducts(productRequestFlux)
+                .doOnNext(uploadResponse -> log.info("Recibido3: {}", uploadResponse))
+                .then()
+                .as(StepVerifier::create)
+                .verifyComplete();
+    }
 }
