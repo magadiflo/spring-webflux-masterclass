@@ -18,6 +18,12 @@ public class ProductServiceImpl implements ProductService {
     private final ProductMapper productMapper;
 
     @Override
+    public Flux<ProductResponse> findAllProducts() {
+        return this.productRepository.findAll()
+                .map(this.productMapper::toProductResponse);
+    }
+
+    @Override
     public Flux<ProductResponse> saveProducts(Flux<ProductRequest> productRequestFlux) {
         return productRequestFlux
                 .map(this.productMapper::toProduct)

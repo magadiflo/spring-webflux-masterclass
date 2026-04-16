@@ -1,15 +1,14 @@
 package dev.magadiflo.app.sec10.controller;
 
 import dev.magadiflo.app.sec10.dto.ProductRequest;
+import dev.magadiflo.app.sec10.dto.ProductResponse;
 import dev.magadiflo.app.sec10.dto.UploadResponse;
 import dev.magadiflo.app.sec10.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -22,6 +21,11 @@ import java.util.UUID;
 public class ProductController {
 
     private final ProductService productService;
+
+    @GetMapping(path = "/download", produces = MediaType.APPLICATION_NDJSON_VALUE)
+    public Mono<ResponseEntity<Flux<ProductResponse>>> downloadProducts() {
+        return Mono.fromSupplier(() -> ResponseEntity.ok(this.productService.findAllProducts()));
+    }
 
     @PostMapping(path = "/upload", consumes = MediaType.APPLICATION_NDJSON_VALUE)
     public Mono<UploadResponse> uploadProducts(@RequestBody Flux<ProductRequest> productRequestFlux) {
