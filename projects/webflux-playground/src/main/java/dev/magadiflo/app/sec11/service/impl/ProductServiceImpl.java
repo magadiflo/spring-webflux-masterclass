@@ -9,30 +9,27 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
+import reactor.core.publisher.Sinks;
 
 @RequiredArgsConstructor
 @Service
 public class ProductServiceImpl implements ProductService {
 
+    private final Sinks.Many<ProductResponse> productSink;
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
 
     @Override
-    public Flux<ProductResponse> findAllProducts() {
-        return this.productRepository.findAll()
-                .map(this.productMapper::toProductResponse);
-    }
-
-    @Override
-    public Flux<ProductResponse> saveProducts(Flux<ProductRequest> productRequestFlux) {
-        return productRequestFlux
+    public Mono<ProductResponse> saveProduct(ProductRequest productRequest) {
+        return Mono.just(productRequest)
                 .map(this.productMapper::toProduct)
-                .as(this.productRepository::saveAll)
-                .map(this.productMapper::toProductResponse);
+                .flatMap(this.productRepository::save)
+                .map(this.productMapper::toProductResponse)
+                .doOnNext(this.productSink::tryEmitNext);
     }
 
     @Override
-    public Mono<Long> countProducts() {
-        return this.productRepository.count();
+    public Flux<ProductResponse> getProductStream() {
+        return this.productSink.asFlux();
     }
 }

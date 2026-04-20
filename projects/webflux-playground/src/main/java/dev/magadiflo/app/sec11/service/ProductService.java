@@ -6,9 +6,7 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface ProductService {
-    Flux<ProductResponse> findAllProducts();
+    Mono<ProductResponse> saveProduct(ProductRequest productRequest);
 
-    Flux<ProductResponse> saveProducts(Flux<ProductRequest> productRequestFlux);
-
-    Mono<Long> countProducts();
+    Flux<ProductResponse> getProductStream();
 }
