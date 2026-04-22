@@ -9,6 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -24,9 +25,11 @@ public class ProductController {
 
     private final ProductService productService;
 
-    @GetMapping(path = "/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    public Mono<ResponseEntity<Flux<ProductResponse>>> productStream() {
-        return Mono.fromSupplier(() -> ResponseEntity.ok(this.productService.getProductStream()));
+    @GetMapping(path = "/stream/{maxPrice}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Mono<ResponseEntity<Flux<ProductResponse>>> productStream(@PathVariable Integer maxPrice) {
+        return Mono.fromSupplier(() -> ResponseEntity.ok(this.productService.getProductStream()
+                .filter(productResponse -> productResponse.price() <= maxPrice))
+        );
     }
 
     @PostMapping
