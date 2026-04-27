@@ -24,7 +24,7 @@ public class ProductController {
 
     @GetMapping(path = "/download", produces = MediaType.APPLICATION_NDJSON_VALUE)
     public Mono<ResponseEntity<Flux<ProductResponse>>> downloadProducts() {
-        return Mono.fromSupplier(() -> ResponseEntity.ok(this.productService.findAllProducts()));
+        return Mono.just(ResponseEntity.ok(this.productService.findAllProducts()));
     }
 
     @PostMapping(path = "/upload", consumes = MediaType.APPLICATION_NDJSON_VALUE)

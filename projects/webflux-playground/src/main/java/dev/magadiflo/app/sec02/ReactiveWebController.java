@@ -27,7 +27,7 @@ public class ReactiveWebController {
                 .bodyToFlux(Product.class)
                 .doOnNext(product -> log.info("recibido: {}", product));
 
-        return Mono.fromSupplier(() -> ResponseEntity.ok(productFlux));
+        return Mono.just(ResponseEntity.ok(productFlux));
     }
 
     @GetMapping(path = "/products/stream", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
@@ -38,6 +38,6 @@ public class ReactiveWebController {
                 .bodyToFlux(Product.class)
                 .doOnNext(product -> log.info("recibido stream: {}", product));
 
-        return Mono.fromSupplier(() -> ResponseEntity.ok(productFlux));
+        return Mono.just(ResponseEntity.ok(productFlux));
     }
 }
