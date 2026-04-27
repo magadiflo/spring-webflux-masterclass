@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 
 @Slf4j
 @RestController
-@RequestMapping(path = "/reactive")
+@RequestMapping(path = "/api/{version}/reactive", version = "1")
 public class ReactiveWebController {
 
     private final WebClient webClient = WebClient.builder()
