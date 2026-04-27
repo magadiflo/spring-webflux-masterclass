@@ -1,5 +1,6 @@
 package dev.magadiflo.customer.app.entity;
 
+import dev.magadiflo.customer.app.enums.Ticker;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -20,6 +21,6 @@ public class PortfolioItem {
     @Id
     private Long id;
     private Long customerId;
-    private String ticker;
+    private Ticker ticker;
     private Integer quantity;
 }
