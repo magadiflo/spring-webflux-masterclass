@@ -30,6 +30,14 @@
             <artifactId>spring-boot-starter-webflux-test</artifactId>
             <scope>test</scope>
         </dependency>
+        <!--Agregado manualmente-->
+        <dependency>
+            <groupId>org.mock-server</groupId>
+            <artifactId>mockserver-spring-test-listener-no-dependencies</artifactId>
+            <version>5.15.0</version>
+            <scope>test</scope>
+        </dependency>
+        <!--/Agregado manualmente-->
     </dependencies>
 
     <build>
