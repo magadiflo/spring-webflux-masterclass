@@ -30,7 +30,9 @@
             <artifactId>spring-boot-starter-webflux-test</artifactId>
             <scope>test</scope>
         </dependency>
+
         <!--Agregado manualmente-->
+        <!-- 🧪 MockServer: simula servicios externos en pruebas de integración -->
         <dependency>
             <groupId>org.mock-server</groupId>
             <artifactId>mockserver-spring-test-listener-no-dependencies</artifactId>
