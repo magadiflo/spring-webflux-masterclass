@@ -1,3 +1,23 @@
+server:
+  port: 8080
+  error:
+    include-message: always
+
 spring:
   application:
     name: aggregator-service
+
+  # API Versioning (Spring Boot 4)
+  webflux:
+    api-version:
+      required: true
+      supported: 1,2
+      use:
+        path-segment: 1
+
+external:
+  services:
+    customer:
+      base-url: http://localhost:6060
+    stock:
+      base-url: http://localhost:7070
