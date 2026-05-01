@@ -50,6 +50,17 @@ public class ApplicationExceptionHandler {
                 .body(problemDetailResponse));
     }
 
+    @ExceptionHandler(Exception.class)
+    public Mono<ResponseEntity<ProblemDetail>> handleGenericException(Exception ex) {
+        log.error("Unhandled exception: {}", ex.getMessage(), ex);
+        var problemDetailResponse = this.buildProblemDetail(HttpStatus.INTERNAL_SERVER_ERROR, ex, problemDetail -> {
+            problemDetail.setTitle("Error interno del servidor");
+        });
+        return Mono.just(ResponseEntity
+                .status(problemDetailResponse.getStatus())
+                .body(problemDetailResponse));
+    }
+
     private ProblemDetail buildProblemDetail(HttpStatus status, Exception ex, Consumer<ProblemDetail> problemDetailConsumer) {
         ProblemDetail problemDetail = ProblemDetail.forStatusAndDetail(status, ex.getMessage());
         problemDetailConsumer.accept(problemDetail);

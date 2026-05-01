@@ -5,8 +5,20 @@ import reactor.core.publisher.Mono;
 
 @UtilityClass
 public class BusinessErrors {
-    public static <T> Mono<T> customerNotFound(Long customerId) {
-        return Mono.error(() -> new CustomerNotFoundException(customerId));
+    public static <T> Mono<T> remoteCustomerNotFound(Long customerId) {
+        return Mono.error(() -> new RemoteCustomerNotFoundException(customerId));
+    }
+
+    public static <T> Mono<T> remoteClient(String message) {
+        return Mono.error(() -> new RemoteClientException(message));
+    }
+
+    public static <T> Mono<T> remoteServer(String message) {
+        return Mono.error(() -> new RemoteServerException(message));
+    }
+
+    public static <T> Mono<T> remoteServiceUnavailable(String message) {
+        return Mono.error(() -> new RemoteServiceUnavailableException(message));
     }
 
     public static <T> Mono<T> invalidTradeRequest(String message) {
