@@ -2,7 +2,11 @@ package dev.magadiflo.aggregator.app.service;
 
 import dev.magadiflo.aggregator.app.client.CustomerServiceClient;
 import dev.magadiflo.aggregator.app.client.StockServiceClient;
-import dev.magadiflo.aggregator.app.dto.*;
+import dev.magadiflo.aggregator.app.dto.CustomerInformation;
+import dev.magadiflo.aggregator.app.dto.StockPriceResponse;
+import dev.magadiflo.aggregator.app.dto.StockTradeRequest;
+import dev.magadiflo.aggregator.app.dto.StockTradeResponse;
+import dev.magadiflo.aggregator.app.dto.TradeRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
