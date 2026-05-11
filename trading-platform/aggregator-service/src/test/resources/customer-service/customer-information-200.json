@@ -1,0 +1,11 @@
+{
+  "id": 1,
+  "name": "sam",
+  "balance": 10000,
+  "holdings": [
+    {
+      "ticker": "GOOGLE",
+      "quantity": 2
+    }
+  ]
+}
