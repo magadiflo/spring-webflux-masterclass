@@ -27,7 +27,7 @@ public class ProductController {
 
     @GetMapping(path = "/stream/{maxPrice}", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public Mono<ResponseEntity<Flux<ProductResponse>>> productStream(@PathVariable Integer maxPrice) {
-        return Mono.fromSupplier(() -> ResponseEntity.ok(this.productService.getProductStream()
+        return Mono.just(ResponseEntity.ok(this.productService.getProductStream()
                 .filter(productResponse -> productResponse.price() <= maxPrice))
         );
     }

@@ -40,7 +40,7 @@ public class CustomerController {
 
         Flux<CustomerResponse> customerResponseFlux = this.customerService.getAllCustomers()
                 .doOnNext(customer -> log.info(customer.toString()));
-        return Mono.fromSupplier(() -> ResponseEntity.ok(customerResponseFlux));
+        return Mono.just(ResponseEntity.ok(customerResponseFlux));
     }
 
     @GetMapping(path = "/simple-pagination")

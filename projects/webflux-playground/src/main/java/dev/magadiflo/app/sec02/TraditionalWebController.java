@@ -13,7 +13,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping(path = "/traditional")
+@RequestMapping(path = "/api/{version}/traditional", version = "1")
 public class TraditionalWebController {
 
     private final RestClient restClient = RestClient.builder()
